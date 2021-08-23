@@ -20,19 +20,18 @@ terraform init
 terraform apply
 ```
 
+# Install PGAdmin 
+These commands configure and deploy PGAdmin
 ```
 cd ..
 gcloud container clusters get-credentials devcluster --region ${TF_VAR_region} --project ${TF_VAR_project}
+
 kubectl create namespace app
+
 kubectl config set-context --current --namespace=app
 
 kubectl create configmap connectionname \
 --from-literal=connectionname="${TF_VAR_project}:${TF_VAR_region}:my-instance"
-
-kubectl create secret generic dbinfo \
-  --from-literal=username=dbuser \
-  --from-literal=password=changeme \
-  --from-literal=database=my-database
 
 kubectl apply -f k8s/service-account.yaml
 
@@ -45,18 +44,21 @@ kubectl annotate serviceaccount \
 gke \
 iam.gke.io/gcp-service-account=sqlproxy-kube@${TF_VAR_project}.iam.gserviceaccount.com
 
-
 kubectl --namespace default create configmap connectionname \
 --from-literal=connectionname="${TF_VAR_project}:${TF_VAR_region}:my-instance"
-
 
 kubectl create secret generic pgadmin-console \
 --from-literal=user="me@email.com" \
 --from-literal=password="changeme"
 
-kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/pgadmin.yaml
+```
 
+## Connect to PGAdmin using port-forwarding
+Setup port-forwarding to you localhost.
+```
 POD_ID=$(kubectl get pods -o name | cut -d '/' -f 2)
 kubectl port-forward "$POD_ID" 8080:80
-
 ```
+
+In a browser go to http://localhost:8080 and connect to the `my-database` using the user `dbuser` and the password `changeme`
