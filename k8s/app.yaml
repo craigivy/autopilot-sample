@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+  labels:
+    app: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      serviceAccountName: gke 
+      # volumes:
+      #   # If you made a secret as a file you can create a volume from it
+      #   - name: cloudsql-sa-creds
+      #     secret:
+      #       secretName: cloudsql-sa-creds
+      containers:
+          # This is the official pgAdmin 4 container
+        - image: gcr.io/ivy-15-project/app:latest
+          name: app
+          # You can make environment variables from GKE secrets
+          # You can read them directly using 'secretKeyRef'
+          # env:
+          #   - name: PGADMIN_DEFAULT_EMAIL
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: dbinfo
+          #         key: username
+          #   - name: PGADMIN_DEFAULT_PASSWORD
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: dbinfo
+          #         key: password
+          # env:
+          #   - name: PGADMIN_DEFAULT_EMAIL
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: pgadmin-console
+          #         key: user
+          #   - name: PGADMIN_DEFAULT_PASSWORD
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: pgadmin-console
+          #         key: password                  
+          ports:
+            - containerPort: 8080
+              name: app
+        # We are pulling the Cloud SQL Proxy container from the official Google
+        # container repository
+        - image: gcr.io/cloudsql-docker/gce-proxy:1.17
+          name: cloudsql-proxy
+          # You can make environment variables from GKE configurations
+          # You can read them from a configmap directly with configMapKeyRef
+          env:
+            - name: INSTANCE_CONNECTION
+              valueFrom:
+                configMapKeyRef:
+                  name: connectionname
+                  key: connectionname
+          command: [
+            "/cloud_sql_proxy",
+            "-instances=$(INSTANCE_CONNECTION)=tcp:5432",
+          ]
+          securityContext:
+            runAsNonRoot: true
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: ".5"
+            limits:
+              memory: "1Gi"
+              cpu: ".5"
+              

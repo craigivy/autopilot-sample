@@ -84,10 +84,20 @@ resource "google_service_account" "kube_sa" {
 }
 
 resource "google_project_iam_member" "kube-iam" {
-  role               = "roles/cloudsql.client"
-  member             = "serviceAccount:${google_service_account.kube_sa.email}"
+  role   = "roles/cloudsql.client"
+  member = "serviceAccount:${google_service_account.kube_sa.email}"
 
-  depens_on = [
+  depends_on = [
     google_project_service.iam_googleapis_com
   ]
 }
+
+resource "google_project_service" "serviceusage_googleapis_com" {
+  service = "serviceusage.googleapis.com"
+}
+
+resource "google_project_service" "cloudbuild_googleapis_com" {
+  service = "cloudbuild.googleapis.com"
+}
+
+ # ERROR: (gcloud.builds.submit) INVALID_ARGUMENT: could not resolve source: googleapi: Error 403: 134687027673@cloudbuild.gserviceaccount.com does not have storage.objects.get access to the Google Cloud Storage object., forbidden

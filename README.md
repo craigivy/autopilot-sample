@@ -62,3 +62,26 @@ kubectl port-forward "$POD_ID" 8080:80
 ```
 
 In a browser go to http://localhost:8080 and connect to the `my-database` using the user `dbuser` and the password `changeme`
+
+
+## Build and deploy an application
+
+TODO: use artifact registory
+TODO: repository address hard coded.
+```
+cd ../app
+gcloud builds submit
+```
+
+## Deploy the application
+```
+cd ..
+kubectl apply -f ./k8s/app.yaml
+kubectl apply -f ./k8s/service-lb.yaml
+```
+Get the service address and curl the address
+``` 
+kubectl get services
+curl [service external address]
+```
+
