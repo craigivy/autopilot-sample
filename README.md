@@ -3,7 +3,7 @@
 ## Prerequisites
 * GCP project
 * User with the proper permissions
-* 
+* Use [cloudshell](https://shell.cloud.google.com/?show=ide%2Cterminal) 
 
 WARNING: This is designed to be a proof of concept and is not security hardened
 
